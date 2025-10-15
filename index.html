@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prueba de Higiene</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e8f9ff;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-top: 20px;
+    }
+
+    h2 {
+      font-size: 1em;
+      font-weight: normal;
+      color: #333;
+    }
+
+    #game-container {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      height: 70vh;
+      position: relative;
+      flex-wrap: wrap;
+    }
+
+    #penguin {
+      width: 220px;
+      height: auto;
+      margin-right: 20px;
+    }
+
+    #dialogue {
+      background-color: white;
+      border: 2px solid #333;
+      border-radius: 15px;
+      padding: 20px;
+      max-width: 45%;
+      font-size: 1.1em;
+      position: relative;
+      text-align: left;
+      word-wrap: break-word;
+    }
+
+    #instructions {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background-color: #fff;
+      border: 2px solid #333;
+      border-radius: 10px;
+      padding: 15px;
+      width: 280px;
+      text-align: left;
+      font-size: 0.9em;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    #score {
+      border-top: 1px solid #aaa;
+      margin-top: 10px;
+      padding-top: 5px;
+      font-weight: bold;
+    }
+
+    #options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      justify-content: center;
+      max-width: 800px;
+      margin: 20px auto;
+    }
+
+    button {
+      padding: 10px 15px;
+      font-size: 1em;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background-color: #4fc3f7;
+      color: white;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #0288d1;
+    }
+
+    #message {
+      position: absolute;
+      left: 10%;
+      bottom: 20%;
+      font-size: 1.5em;
+      opacity: 0;
+      transition: opacity 0.5s;
+      font-weight: bold;
+    }
+
+    @keyframes particles {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(-50px); }
+    }
+
+    .particle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      animation: particles 1s ease-out forwards;
+    }
+
+    #final-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.95);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 10;
+    }
+
+    #final-screen h1 {
+      font-size: 2.5em;
+      color: #333;
+    }
+
+    #final-screen p {
+      font-size: 1.2em;
+    }
+
+    /* 📱 Ajustes para móvil */
+    @media (max-width: 768px) {
+      #game-container {
+        flex-direction: column;
+        height: auto;
+      }
+
+      #penguin {
+        width: 180px;
+        margin: 0 auto;
+      }
+
+      #dialogue {
+        order: -1;
+        max-width: 85%;
+        margin: 10px auto;
+        font-size: 1em;
+      }
+
+      #instructions {
+        position: static;
+        width: 90%;
+        margin: 10px auto;
+      }
+
+      #options {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      #message {
+        left: 5%;
+        bottom: 10%;
+        font-size: 1.2em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Prueba de Higiene</h1>
+  <h2>(Coloca la pantalla de tu celular horizontalmente para más comodidad)</h2>
+
+  <div id="instructions">
+    <strong>Instrucciones:</strong><br>
+    Ahora que ya recibiste la capacitación de Higiene personal nuestro amigo Pingüino te hará unas preguntas para ver qué tanto aprendiste. Cada respuesta correcta te sumará puntos y si respondes de manera equivocada no se sumará ningún punto.
+    <div id="score">Puntuación: <span id="score-value">0</span></div>
+  </div>
+
+  <div id="game-container">
+    <img id="penguin" src="pinguino.png" alt="Pingüino">
+    <div id="dialogue">¡Bienvenidos!</div>
+  </div>
+
+  <button id="start-button">Comenzar juego</button>
+  <div id="options"></div>
+  <div id="message"></div>
+
+  <div id="final-screen">
+    <h1>¡Gracias por jugar!</h1>
+    <p>Tu puntuación fue: <span id="final-score"></span></p>
+    <p>Ahora toma una captura de pantalla y colócala en el siguiente enlace: <a href="https://google.com" target="_blank">google.com</a></p>
+  </div>
+
+  <script>
+    const questions = [
+      { q: "¿Por qué es importante la higiene personal en la planta?", correct: "Porque evita que se transmitan enfermedades en los alimentos que podrían dañar gravemente a los consumidores.", wrong: ["Porque así me veo más guapo/a.", "No es tan importante, lo que sí importa es que el producto salga a tiempo del área de producción."] },
+      { q: "¿Cuándo deberíamos de lavarnos las manos?", correct: "Antes de entrar a la planta, después de comer o beber, después de ir al baño, después de sonarse la nariz, antes de manipular alimentos crudos o que no serán calentados antes de su consumo, después de manipular basura o cualquier material potencialmente contaminado.", wrong: ["Cuando nos recordemos o cuando llevemos mucho tiempo de no hacerlo.", "Sólo después de ir al baño, lo demás es una recomendación pero no es necesario."] },
+      { q: "¿Cuáles son los pasos para lavarnos las manos apropiadamente?", correct: "Primero humedecemos nuestras manos, luego aplicamos jabón, luego frotamos nuestras manos (por delante y por detrás) durante 20 a 30 segundos, luego usamos agua para retirar el jabón de nuestras manos, luego secamos nuestras manos con papel limpio, tiramos el papel en el bote de basura y completamos el lavado con alcohol en gel.", wrong: ["Primero aplicamos jabón en nuestras manos, luego las frotamos durante unos 5 segundos, luego usamos un poco de agua para retirar el jabón.", "Primero humedecemos nuestras manos, luego las frotamos durante unos 10 segundos y tiramos el papel al piso."] },
+      { q: "¿Qué síntomas pueden presentar los consumidores si se intoxicaron al consumir un producto?", correct: "Vómitos, Náuseas, Fiebre, Diarrea, Dolor de estómago, Dolor de cabeza, Problemas Renales e incluso la Muerte.", wrong: ["Sequedad en las manos, Congestión nasal y Tos.", "Tos, Fiebre y algo de Dolor Muscular."] },
+      { q: "¿Se puede toser o estornudar en el área de producción?", correct: "No, al hacerlo contamino el producto.", wrong: ["Sí, no pasa nada si giro la cabeza rápidamente.", "Sí, los gérmenes se morirán de igual forma."] },
+      { q: "¿Qué debemos hacer con el equipo para reducir el riesgo de contaminar el producto?", correct: "Usar el equipo de manera apropiada; asegurándonos de que esté limpio, en buen estado y que lo llevemos puesto como nos indicaron inicialmente.", wrong: ["Usar el equipo sin importar su estado, lo importante es que lo use.", "Usar el equipo para interactuar con superficies o productos contaminados sin lavarlos después."] },
+      { q: "¿Qué debemos hacer con respecto a nuestro bello facial (bigote, barba)?", correct: "No dejar que crezca la barba ni el bigote para que no le caigan pelos al producto.", wrong: ["Dejarlo, no habrá problema mientras tenga cuidado.", "Quitarnos solo el de la barbilla."] },
+      { q: "¿Se pueden tocar los productos o los utensilios de trabajo con las manos?", correct: "No, debemos hacerlo con guantes limpios porque si lo hacemos con nuestras manos podemos contaminar el producto.", wrong: ["Sí, siempre y cuando nos hayamos lavado las manos apropiadamente.", "Los productos no, pero los utensilios sí."] },
+      { q: "¿Es importante tener las uñas cortas y limpias?", correct: "Sí, las uñas largas pueden acumular suciedad y eso incrementa el riesgo de contaminación.", wrong: ["Mientras tenga las uñas cortas no habrá problema.", "No, siempre y cuando use guantes limpios no habrá problema."] },
+      { q: "¿Cómo se pueden transmitir las enfermedades en los alimentos?", correct: "Se transmiten a través del contacto con la piel, superficies contaminadas, otros productos contaminados, si estornudamos, tosemos, nos sonamos la nariz o derramamos saliva en el área de producción o si utilizamos utensilios que no fueron debidamente lavados.", wrong: ["Sólo se transmiten si los tocamos con las manos sucias.", "Sólo se transmiten si estornudamos o tosemos muy cerca del producto."] }
+    ];
+
+    const dialogue = document.getElementById("dialogue");
+    const optionsContainer = document.getElementById("options");
+    const scoreValue = document.getElementById("score-value");
+    const startButton = document.getElementById("start-button");
+    const message = document.getElementById("message");
+    const finalScreen = document.getElementById("final-screen");
+    const finalScore = document.getElementById("final-score");
+
+    let currentQuestion = 0;
+    let score = 0;
+    let secondChance = false;
+
+    startButton.addEventListener("click", startGame);
+
+    function startGame() {
+      startButton.style.display = "none";
+      showQuestion();
+    }
+
+    function showQuestion() {
+      if (currentQuestion >= questions.length) return endGame();
+
+      const q = questions[currentQuestion];
+      dialogue.textContent = q.q;
+      optionsContainer.innerHTML = "";
+
+      const allOptions = [q.correct, ...q.wrong].sort(() => Math.random() - 0.5);
+      allOptions.forEach(option => {
+        const btn = document.createElement("button");
+        btn.textContent = option;
+        btn.onclick = () => checkAnswer(option === q.correct);
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(isCorrect) {
+      if (isCorrect) {
+        if (!secondChance) score += 10;
+        scoreValue.textContent = score;
+        showParticles("green");
+        showMessage("¡Correcto!", "green");
+        nextQuestion();
+      } else if (!secondChance) {
+        secondChance = true;
+        showParticles("red");
+        showMessage("Incorrecto ¡inténtalo otra vez!", "red");
+      } else {
+        secondChance = false;
+        showParticles("red");
+        nextQuestion();
+      }
+    }
+
+    function nextQuestion() {
+      setTimeout(() => {
+        secondChance = false;
+        currentQuestion++;
+        showQuestion();
+      }, 1000);
+    }
+
+    function showParticles(color) {
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement("div");
+        particle.className = "particle";
+        particle.style.backgroundColor = color;
+        particle.style.left = `${50 + Math.random() * 20 - 10}%`;
+        particle.style.top = `${60 + Math.random() * 10 - 5}%`;
+        document.body.appendChild(particle);
+        setTimeout(() => particle.remove(), 1000);
+      }
+    }
+
+    function showMessage(text, color) {
+      message.textContent = text;
+      message.style.color = color;
+      message.style.opacity = 1;
+      setTimeout(() => message.style.opacity = 0, 800);
+    }
+
+    function endGame() {
+      dialogue.textContent = "";
+      optionsContainer.innerHTML = "";
+      finalScreen.style.display = "flex";
+      finalScore.textContent = score;
+      showParticles("rainbow");
+    }
+  </script>
+</body>
+</html>
